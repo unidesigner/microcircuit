@@ -1,1 +1,1 @@
-from skeleton_metrics import *
+from skeleton import *
