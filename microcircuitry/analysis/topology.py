@@ -4,6 +4,7 @@ from IPython.utils import autoattr as desc
 
 from .base import BaseAnalyzer
 
+
 class SpatialAnalyzer(BaseAnalyzer):
     """Analyzer object for topological analysis"""
 
@@ -13,5 +14,4 @@ class SpatialAnalyzer(BaseAnalyzer):
         ---------
         """
         BaseAnalyzer.__init__(self, input)
-
         self.graph = input.graph

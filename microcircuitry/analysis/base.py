@@ -1,6 +1,6 @@
 from inspect import getargspec
-
 from IPython.utils import autoattr as desc
+
 
 class BaseAnalyzer(desc.ResetMixin):
     """
@@ -12,6 +12,9 @@ class BaseAnalyzer(desc.ResetMixin):
 
     """
 
+    def __init__(self, input=None):
+        self.input = input
+
     @desc.auto_attr
     def parameterlist(self):
         plist = getargspec(self.__init__).args
@@ -22,10 +25,7 @@ class BaseAnalyzer(desc.ResetMixin):
     @property
     def parameters(self):
         return dict([(p,
-                    getattr(self, p, 'MISSING')) for p in self.parameterlist])
-
-    def __init__(self, input=None):
-        self.input = input
+            getattr(self, p, 'MISSING')) for p in self.parameterlist])
 
     def set_input(self, input):
         """Set the input of the analyzer, if you want to reuse the analyzer
@@ -36,5 +36,4 @@ class BaseAnalyzer(desc.ResetMixin):
     def __repr__(self):
         params = ', '.join(['%s=%r' % (p, getattr(self, p, 'MISSING'))
                             for p in self.parameterlist])
-
         return '%s(%s)' % (self.__class__.__name__, params)

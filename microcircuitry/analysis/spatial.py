@@ -4,6 +4,7 @@ from IPython.utils import autoattr as desc
 
 from .base import BaseAnalyzer
 
+
 class SpatialAnalyzer(BaseAnalyzer):
     """Analyzer object for spatial analysis"""
 

@@ -4,6 +4,7 @@ from IPython.utils import autoattr as desc
 
 from .base import BaseAnalyzer
 
+
 class NetworkAnalyzer(BaseAnalyzer):
     """Analyzer object for network/graph analysis"""
 
@@ -18,4 +19,4 @@ class NetworkAnalyzer(BaseAnalyzer):
 
     @desc.auto_attr
     def centrality(self):
-        return nx.algorithms.centrality.betweenness_centrality( self.graph )
+        return nx.algorithms.centrality.betweenness_centrality(self.graph)

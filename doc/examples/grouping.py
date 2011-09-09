@@ -19,10 +19,6 @@ Highlight the selected group
 """
 
 {
-
-12 : { "type" : "Y-cell",
-      "size" : "large",
-      "summation" : "non-linear",
-      "response" : "well to phasic or transient stimuli"}
-
+12: {"type": "Y-cell", "size": "large", "summation": "non-linear",
+    "response": "well to phasic or transient stimuli"}
 }
