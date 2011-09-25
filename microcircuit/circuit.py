@@ -1,17 +1,7 @@
 import numpy as np
 import networkx as nx
 
-
-space_unit_conversion = {
-    'nm': 1,  # nanometer
-    'um': 10 ** 3,  # micrometer
-    'mm': 10 ** 6,  # millimeter
-    'cm': 10 ** 7,  # centimeter
-    'm': 10 ** 9  # meter
-}
-
-# The basic resolution
-base_unit = 'nm'
+import constants as const
 
 
 class CircuitBase(object):
@@ -20,9 +10,10 @@ class CircuitBase(object):
                  vertices, connectivity, space_unit,
                  metadata=None, vertices_properties=None,
                  connectivity_properties=None):
-        if space_unit not in space_unit_conversion:
+        if space_unit not in const.space_unit_conversion:
             raise ValueError('Invalid space unit %s, must be one of %s' %
-                             (space_unit, space_unit_conversion.keys()))
+                             (space_unit,
+                              constants.space_unit_conversion.keys()))
         self.vertices = vertices
         self.connectivity = connectivity
         self.vertices_properties = vertices_properties
@@ -32,6 +23,29 @@ class CircuitBase(object):
             self.metadata = {}
         else:
             self.metadata = metadata
+
+    def get_vertices_property(self, key, metadata=False):
+        """Get Numpy array for vertices property
+        """
+        if key in self.vertices_properties:
+            if metadata:
+                return self.vertices_properties[key][const.METADATA]
+            else:
+                return self.vertices_properties[key][const.DATA]
+        else:
+            raise Exception("No vertices property {0} exists.".format(key))
+
+    def get_connectivity_property(self, key, metadata=False):
+        """Get Numpy array for connectivity property
+        """
+        if key in self.connectivity_properties:
+            if metadata:
+                return self.connectivity_properties[key][const.METADATA]
+            else:
+                return self.connectivity_properties[key][const.DATA]
+
+        else:
+            raise Exception("No connectivity property {0} exists.".format(key))
 
 
 class Circuit(CircuitBase):
@@ -50,15 +64,11 @@ class Circuit(CircuitBase):
                              vertices_properties,
                              connectivity_properties)
         # dictionary to map from index to id if it exists
-        if "id" in self.vertices_properties:
-            a = self.vertices_properties["id"]["data"]
+        if const.SKELETON_ID in self.vertices_properties:
+            a = self.get_vertices_property(const.SKELETON_ID)
             self.map_vertices_idx2id = dict(zip(range(len(a)), a))
         else:
             self.map_vertices_idx2id = None
-
-    @staticmethod
-    def from_graph(self):
-        pass
 
     def asgraph(self, add_attributes=False):
         """ Return circuit as graph

@@ -1,14 +1,14 @@
-"""
-netan = mc.analysis.NetworkAnalyzer(circuit)
-print netan
-print netan.centrality
-# netan.reset()
-print netan.centrality
+from nose.tools import assert_true
 
-# extract subcircuit
-subcirc = mc.transforms.modularization.subcircuit(circuit, 'id',
-                                                  500, 'connectivity')
-print subcirc.edges()
-print circuit.relabel_verticesid
+from ...dataset.testcircuit import testcircuit
+from ..network import NetworkAnalyzer
 
-"""
+
+def test_network_networkconnectivity():
+    """Test NetworkAnalyzer network_connectivity
+    """
+    nal = NetworkAnalyzer(testcircuit)
+
+    assert_true(nal.network_connectivity.nodes() == [500, 100])
+    edges = [(100, 500, {'weight': 1})]
+    assert_true(nal.network_connectivity.edges(data=True) == edges)
