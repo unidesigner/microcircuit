@@ -1,6 +1,6 @@
 """
 
-Microcircuityr: Neural circuit analysis for neuroscience
+Microcircuit: Neural circuit analysis for neuroscience
 
 The module has several sub-modules:
 
@@ -16,5 +16,5 @@ The module has several sub-modules:
 """
 __docformat__ = 'restructuredtext'
 
-from version import  __version__
-from circuit import *
+from .version import  __version__
+from .circuit import Circuit

@@ -74,7 +74,7 @@ class Circuit(CircuitBase):
         G.add_edges_from(
             zip(self.connectivity[:, 0], self.connectivity[:, 1]))
         if add_attributes:
-            # TODO: Add metadata as graph attributes!
+            G.graph = self.metadata
             # add vertices attributes
             for idx, d in G.nodes_iter(data=True):
                 d['location'] = self.vertices[idx, :]

@@ -1,76 +1,34 @@
+import os.path as op
+
+from nose.tools import assert_true
+from numpy.testing import assert_array_almost_equal
+
 import numpy as np
-import microcircuit as mc
+from ..dataset import testcircuit
+from ..circuit import Circuit
 
-vert = np.array([[0, 0, 0],    # skeleton node (root)
-                 [5, 5, 0],    # skeleton node
-                 [10, 3, 0],   # connector
-                 [15, 5, 0],   # skeleton node
-                 [18, 0, 0],   # skeleton node (root)
-                 [20, 0, 0]],  # skeleton node
-                 dtype=np.float32)
+def test_circuit():
+    """Create circuit
+    """
+    mytestcircuit = Circuit(
+            vertices=testcircuit.vert, connectivity=testcircuit.conn,
+            vertices_properties=testcircuit.vertices_properties,
+            connectivity_properties=testcircuit.connectivity_properties,
+            metadata=testcircuit.metadata
+    )
+    map_dict = {0:10,
+                1:11,
+                2:200,
+                3:20,
+                4:21,
+                5:22}
+    assert_true(mytestcircuit.map_vertices_idx2id==map_dict)
 
-conn = np.array([[0, 1],   # axonal
-                 [1, 2],   # presyn
-                 [3, 2],   # postsyn
-                 [3, 4],   # dendritic
-                 [4, 5]],  # dendritic
-                 dtype=np.uint32)
+def test_circuitasgraph():
+    """Test testcircuit as graph
+    """
+    circuitgraph = testcircuit.testcircuit.asgraph(add_attributes=True)
 
-vertices_properties = {
-    "id": {"data": np.array([10, 11, 200, 20, 21, 22], dtype=np.uint32),
-           "metadata": {}},
-    # TODO: per node id, or skeletonid (but not for connector)
-    "label": {"data": np.array([3, 1, 2, 1, 3, 1], dtype=np.uint32),
-              "metadata": {
-                    "type": "categorial",
-                    "semantics": {
-                        # TODO: branch node, leaf node etc.
-                        1: {"name": "skeleton node", "ref": "XXX"},
-                        2: {"name": "connector node", "ref": "XXX"},
-                        3: {"name": "skeleton root node", "ref": "XXX"}
-                    }
-              }
-    }
-}
-
-connectivity_properties = {
-    "id": {"data": np.array([100, 100, 500, 500, 500], dtype=np.uint32),
-            "metadata": {}
-    },
-    "type": {"data": np.array([1, 2, 3, 4, 4], dtype=np.uint32),
-             "metadata": {
-                    "type": "categorial",
-                    "value": {
-                        # TODO: unknown, spine head, spine neck
-                        1: {"name": "axon", "ref": "XXX"},
-                        2: {"name": "presynaptic_to", "ref": "XXX"},
-                        3: {"name": "postsynaptic_to", "ref": "XXX",
-                            "invert": True},
-                        4: {"name": "dendrite", "ref": "XXX"}
-                    }
-                }
-    }
-}
-
-circuit = mc.Circuit(
-    vertices=vert, connectivity=conn,
-    vertices_properties=vertices_properties,
-    connectivity_properties=connectivity_properties
-)
-
-netan = mc.analysis.NetworkAnalyzer(circuit)
-print netan
-print netan.centrality
-# netan.reset()
-print netan.centrality
-
-# extract subcircuit
-subcirc = mc.transforms.modularization.subcircuit(circuit, 'id',
-                                                  500, 'connectivity')
-print subcirc.edges()
-print circuit.relabel_verticesid
-
-manal = mc.analysis.MeasureAnalyzer(circuit, method={
-    'this_method': 'compartmental_path_length'})
-
-print "measure analyer", manal.measure
+    assert_true(circuitgraph.number_of_nodes()==6)
+    assert_true(circuitgraph.number_of_edges()==5)
+    assert_true(circuitgraph.graph['name']=='testcircuit')
