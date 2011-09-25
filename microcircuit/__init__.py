@@ -6,9 +6,9 @@ The module has several sub-modules:
 
 - ``circuit``: contains the constructors for circuit objects
 
-- ``analysis``: ...
+- ``analysis``: analyzer classes that are circuit aware
 
-- ``algorithms``: ...
+- ``algorithms``: functions not-aware of the circuit semantics
 
 - ``transforms``: ...
 

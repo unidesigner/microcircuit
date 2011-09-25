@@ -23,6 +23,7 @@ vertices_properties = {
     "id": {"data": np.array([10, 11, 200, 20, 21, 22], dtype=np.uint32),
            "metadata": {}},
     # TODO: per node id, or skeletonid (but not for connector)
+
     "label": {"data": np.array([3, 1, 2, 1, 3, 1], dtype=np.uint32),
               "metadata": {
                     "type": "categorial",

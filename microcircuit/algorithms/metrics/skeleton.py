@@ -21,6 +21,5 @@ def compartmental_path_length(circuitgraph, metadata, attribute="type"):
     """ Return path length segregated by label type """
     ret = dict.fromkeys(metadata.keys(), 0.0)
     for u, v, d in circuitgraph.edges_iter(data=True):
-        print d
         ret[d[attribute]] += float(d["length"])
     return ret

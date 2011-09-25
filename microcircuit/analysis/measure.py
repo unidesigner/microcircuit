@@ -3,7 +3,7 @@ from IPython.utils import autoattr as desc
 import microcircuit.algorithms.metrics.skeleton as skeletonmetrics
 
 from .base import BaseAnalyzer
-
+from ..transforms.modularization import unique_values
 
 class MeasureAnalyzer(BaseAnalyzer):
     """Analyzer object for measures for skeletons"""
@@ -25,15 +25,18 @@ class MeasureAnalyzer(BaseAnalyzer):
             self.method = method
         self.graph = circuit.asgraph(add_attributes=True)
         # retrieve unique identifiers of skeletons
-        if "id" in circuit.connectivity_properties:
+        uniqueidarr = unique_values(circuit, 'id', 'connectivity')
+        if not uniqueidarr is None:
+            # for each skeleton, use id as dictionary key
+            self.skeleton_graphs = dict.fromkeys(uniqueidarr)
+            # for each skeleton id, retrieve connectivity indices
             idarr = circuit.connectivity_properties["id"]["data"]
-            uniqueidarr = np.unique(idarr)
-            self.id_idx = dict.fromkeys(uniqueidarr)
             for id in uniqueidarr:
                 # compute list of indices for each identifier
                 idx = np.where(idarr == id)[0]
                 # TODO: does it include attributes?
-                self.id_idx[id] = self.graph.subgraph(idx)
+                # store each skeleton as subgraph
+                self.skeleton_graphs[id] = self.graph.subgraph(idx)
         if "type" in circuit.connectivity_properties:
             self.type = circuit.connectivity_properties["type"]
         else:
@@ -41,8 +44,8 @@ class MeasureAnalyzer(BaseAnalyzer):
 
     @desc.auto_attr
     def measure(self):
-        ret = dict.fromkeys(self.id_idx.keys())
-        for id, value in self.id_idx.items():
+        ret = dict.fromkeys(self.skeleton_graphs.keys())
+        for id, value in self.skeleton_graphs.items():
             if self.method['this_method'] == 'nr_vertices':
                 ret[id] = value.number_of_nodes()
             elif self.method['this_method'] == 'nr_connectivity':

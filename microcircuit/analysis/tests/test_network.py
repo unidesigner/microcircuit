@@ -1,6 +1,4 @@
-
 """
-
 netan = mc.analysis.NetworkAnalyzer(circuit)
 print netan
 print netan.centrality
@@ -13,8 +11,4 @@ subcirc = mc.transforms.modularization.subcircuit(circuit, 'id',
 print subcirc.edges()
 print circuit.relabel_verticesid
 
-manal = mc.analysis.MeasureAnalyzer(circuit, method={
-    'this_method': 'compartmental_path_length'})
-
-print "measure analyer", manal.measure
 """
