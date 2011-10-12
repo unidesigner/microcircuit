@@ -19,12 +19,13 @@ from .. import Circuit
 
 metadata = {'name' : 'testcircuit002',
             'neuronmap': {
-                111: {'name':'S1'},
-                222: {'name':'I1'},
-                333: {'name':'I2'},
-                444: {'name':'M1'},
-                555: {'name':'I3'},
-                666: {'name':'I4'}
+                111: {'name':'S1', 'type': 'Sensory neuron',
+                      'lineage': 'XXX', 'desc':'XXX'},
+                222: {'name':'I1', 'type': 'Interneuron'},
+                333: {'name':'I2', 'type': 'Interneuron'},
+                444: {'name':'M1', 'type': 'Motor neuron'},
+                555: {'name':'I3', 'type': 'Interneuron'},
+                666: {'name':'I4', 'type': 'Interneuron'}
             }}
 
 vert = np.array([[0, 0, 0],    # S1: skeleton node (root)
@@ -82,10 +83,11 @@ vertices_properties = {
               "metadata": {
                     "type": "categorial",
                     "semantics": {
-                        1: {"name": "skeleton node", "ref": "XXX"},
-                        2: {"name": "skeleton root node", "ref": "XXX"},
-                        3: {"name": "chemical synapse", "ref": "XXX"},
-                        4: {"name": "gap junction", "ref": "XXX"},
+                        # TODO: "type" required?
+                        1: {"name": "skeleton node", "ref": "XXX", "type":"skeleton"},
+                        2: {"name": "skeleton root node", "ref": "XXX", "type":"skeleton"},
+                        3: {"name": "chemical synapse", "ref": "XXX", "type":"connector"},
+                        4: {"name": "gap junction", "ref": "XXX", "type":"connector"},
                     }
               }
     }

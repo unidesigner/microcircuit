@@ -59,4 +59,13 @@ def subcircuit(circuit, property, value, type='vertices'):
         raise Exception("Property {0} does not exist".format(property))
 
 
+def wiring_diagram(circuit, neuronmap='neuronmap'):
+    """ Extract the wiring diagram from a circuit
+    """
+    if circuit.metadata.has_key(neuronmap):
+        neuronmap = circuit.metadata[neuronmap]
+    
+    for id, value in neuronmap.items():
+        print id, value
+
     
