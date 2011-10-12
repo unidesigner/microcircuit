@@ -9,7 +9,7 @@ class MeasureAnalyzer(BaseAnalyzer):
     """Analyzer object for measures for skeletons"""
 
     def __init__(self, circuit=None, method=None):
-        """ Compute similarities between skeletons modularized
+        """ Compute similarities between skeletons extracted
         with `id` of connectivity_properties
 
         Parameters

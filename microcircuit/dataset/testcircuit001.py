@@ -2,7 +2,7 @@ import numpy as np
 
 from .. import Circuit
 
-metadata = {'name' : 'testcircuit'}
+metadata = {'name' : 'testcircuit001'}
 
 vert = np.array([[0, 0, 0],    # skeleton node (root)
                  [5, 5, 0],    # skeleton node
@@ -14,7 +14,7 @@ vert = np.array([[0, 0, 0],    # skeleton node (root)
 
 conn = np.array([[0, 1],   # axonal
                  [1, 2],   # presyn
-                 [3, 2],   # postsyn
+                 [2, 3],   # postsyn
                  [3, 4],   # dendritic
                  [4, 5]],  # dendritic
                  dtype=np.uint32)
@@ -46,10 +46,10 @@ connectivity_properties = {
                     "type": "categorial",
                     "value": {
                         # TODO: unknown, spine head, spine neck
+                        0: {"name": "unknown"},
                         1: {"name": "axon", "ref": "XXX"},
-                        2: {"name": "presynaptic_to", "ref": "XXX"},
-                        3: {"name": "postsynaptic_to", "ref": "XXX",
-                            "invert": True},
+                        2: {"name": "presynaptic", "ref": "XXX"},
+                        3: {"name": "postsynaptic", "ref": "XXX"},
                         4: {"name": "dendrite", "ref": "XXX"}
                     }
                 }

@@ -34,8 +34,11 @@ def subcircuit(circuit, property, value, type='vertices'):
     Parameters
     ----------
     property : str
+        Property value used for extraction
     value : number
+        The value that select the subcircuit, such as an identifier
     type : {'vertices', 'connectivity'}
+        Selection based on vertices or connectivity properties
     """
 
     if type == 'vertices':
@@ -54,3 +57,6 @@ def subcircuit(circuit, property, value, type='vertices'):
         return subcircuit_fromindex(circuit, idx)
     else:
         raise Exception("Property {0} does not exist".format(property))
+
+
+    
