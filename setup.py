@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2011 Stephan Gerhard <connectome@unidesign.ch>
 
-descr   = """Python project for neural circuit analysis in neuroscience."""
+descr = """Python project for neural circuit analysis in neuroscience."""
 
 
 import os

@@ -24,10 +24,10 @@ vertices_properties = {
            "metadata": {}},
     # TODO: per node id, or skeletonid (but not for connector)
 
-    "label": {"data": np.array([3, 1, 2, 1, 3, 1], dtype=np.uint32),
-              "metadata": {
+    "type": {"data": np.array([3, 1, 2, 1, 3, 1], dtype=np.uint32),
+             "metadata": {
                     "type": "categorial",
-                    "semantics": {
+                    "value": {
                         # TODO: branch node, leaf node etc.
                         1: {"name": "skeleton node", "ref": "XXX"},
                         2: {"name": "connector node", "ref": "XXX"},

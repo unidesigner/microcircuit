@@ -28,6 +28,7 @@ def unique_values(circuit, property, type='vertices'):
     else:
         return None
 
+
 def subcircuit(circuit, property, value, type='vertices'):
     """ Return subcircuit to extract a particular skeleton or subcircuit
 
@@ -40,7 +41,6 @@ def subcircuit(circuit, property, value, type='vertices'):
     type : {'vertices', 'connectivity'}
         Selection based on vertices or connectivity properties
     """
-
     if type == 'vertices':
         prop = circuit.vertices_properties
     elif type == 'connectivity':

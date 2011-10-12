@@ -3,7 +3,8 @@ from IPython.utils import autoattr as desc
 import microcircuit.algorithms.metrics.skeleton as skeletonmetrics
 
 from .base import BaseAnalyzer
-from ..transforms.modularization import unique_values
+import microcircuit.constants as const
+
 
 class MeasureAnalyzer(BaseAnalyzer):
     """Analyzer object for measures for skeletons"""
@@ -25,12 +26,14 @@ class MeasureAnalyzer(BaseAnalyzer):
             self.method = method
         self.graph = circuit.asgraph(add_attributes=True)
         # retrieve unique identifiers of skeletons
-        uniqueidarr = unique_values(circuit, 'id', 'connectivity')
+        uniqueidarr = np.unique(circuit.get_connectivity_property(
+            const.SKELETON_ID))
         if not uniqueidarr is None:
             # for each skeleton, use id as dictionary key
             self.skeleton_graphs = dict.fromkeys(uniqueidarr)
             # for each skeleton id, retrieve connectivity indices
-            idarr = circuit.connectivity_properties["id"]["data"]
+            idarr = circuit.connectivity_properties[const.SKELETON_ID][const
+            .DATA]
             for id in uniqueidarr:
                 # compute list of indices for each identifier
                 idx = np.where(idarr == id)[0]

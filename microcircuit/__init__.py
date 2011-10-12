@@ -18,3 +18,7 @@ __docformat__ = 'restructuredtext'
 
 from .version import  __version__
 from .circuit import Circuit
+
+import transforms
+import simulator
+import dataset
