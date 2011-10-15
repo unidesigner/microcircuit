@@ -25,22 +25,35 @@ class CircuitBase(object):
             self.metadata = metadata
 
     def get_vertices_property(self, key, metadata=False):
-        """Get Numpy array for vertices property
+        """Get vertices property
         """
         if key in self.vertices_properties:
             if metadata:
-                return self.vertices_properties[key][const.METADATA]
+                return (self.vertices_properties[key][const.DATA],
+                        self.vertices_properties[key][const.METADATA])
             else:
                 return self.vertices_properties[key][const.DATA]
         else:
             raise Exception("No vertices property {0} exists.".format(key))
 
     def get_connectivity_property(self, key, metadata=False):
-        """Get Numpy array for connectivity property
+        """Get connectivity property
+
+        Parameters
+        ----------
+        key : str
+            The property name to retrieve
+        metadata : bool
+            If True, returns a tuple with (array,metadata)
+
+        Returns
+        -------
+        prop_array : `array_like`
         """
         if key in self.connectivity_properties:
             if metadata:
-                return self.connectivity_properties[key][const.METADATA]
+                return (self.connectivity_properties[key][const.DATA],
+                        self.connectivity_properties[key][const.METADATA])
             else:
                 return self.connectivity_properties[key][const.DATA]
 
@@ -78,8 +91,15 @@ class Circuit(CircuitBase):
         add_attributes : bool
             Add spatial location and properties as attributes
             to nodes (vertices) and edges (connectivity)
+
+        Returns
+        -------
+        G : NetworkX DiGraph
         """
         # TODO: directionality correct, bidirectional links, caching
+        # The interpretation whether a connector is implicitly
+        # directional (e.g. chemical synapses) or bidirectional (gap junctions)
+        # is made when extracting a connectome from the circuit
         G = nx.DiGraph()
         G.add_edges_from(
             zip(self.connectivity[:, 0], self.connectivity[:, 1]))

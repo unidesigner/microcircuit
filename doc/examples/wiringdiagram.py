@@ -1,5 +1,5 @@
 from microcircuit.dataset.testcircuit002 import testcircuit as tc
 
-import microcircuit.transforms as t
+from microcircuit.transforms.modularization import create_wiring_diagram
 
-t.wiring_diagram(tc)
+connectome = create_wiring_diagram(tc)

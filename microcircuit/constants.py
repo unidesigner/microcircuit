@@ -1,24 +1,27 @@
 
-# skeleton identifiers grouping the connectivity into individual morphologies
+# skeleton identifiers grouping the connective into individual morphologies
 SKELETON_ID = 'id'
 
-# type of either vertices or connectivity
+# type of vertices or connectivity
 TYPE = 'type'
 
 # name of the data key
 DATA = 'data'
 
-# name of the metadta key
+# name of the metadata key
 METADATA = 'metadata'
 
 # connector node
 CONNECTOR_NODE = 'connector node'
 
 # presynaptic connectivity
-PRESYNAPTIC_TO = 'presynaptic_to'
+PRESYNAPTIC = 'presynaptic'
 
 # postsynaptic connectivity
-POSTSYNAPTIC_TO = 'postsynaptic_to'
+POSTSYNAPTIC = 'postsynaptic'
+
+# gap junction
+GAP_JUNCTION = 'gapjunction'
 
 space_unit_conversion = {
     'nm': 1,  # nanometer
