@@ -22,3 +22,4 @@ from .circuit import Circuit
 import transforms
 import simulator
 import dataset
+import constants

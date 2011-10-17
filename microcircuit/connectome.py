@@ -6,7 +6,7 @@ import constants as const
 
 class Connectome(object):
 
-    def __init__(self, metadata=None, circuit=None):
+    def __init__(self, metadata=None, circuit=None, graph=None):
         """Connectome or Wiring Diagram. Represents a graph view on a `Circuit`
         """
 
@@ -18,15 +18,15 @@ class Connectome(object):
 
         if not circuit is None:
             # dictionary of skeleton objects keyed by their id
-            self.skeletons = self.skeleton_dict()
+            self.skeletons = self.get_skeleton_dict()
 
             # NetworkX graph with nodes (skeletons) and edges (connectivity)
-            self.graph = self.network_connectivity()
+            self.graph = self.get_network_connectivity()
         else:
             self.skeletons = None
-            self.graph = None
+            self.graph = graph
 
-    def network_connectivity(self):
+    def get_network_connectivity(self):
         """Extract a network from the input circuit where
         nodes are skeletons and edges are the number of synaptic
         connections
@@ -35,11 +35,9 @@ class Connectome(object):
         mecotc = self.circuit.get_connectivity_property(const.TYPE, True)[1]
 
         vertices_type = self.circuit.get_vertices_property(const.TYPE)
+        # can select pre, post, gap
         connectivity_type = self.circuit.get_connectivity_property(const.TYPE)
         connectivity_skeletonid = self.circuit.get_connectivity_property(const.SKELETON_ID)
-
-        connector_value = extract_value_customdict(metc,
-                                                   const.CONNECTOR_NODE)
 
         # define valid transform of M:N connector pairs and whether directional
         # not directional implies bidirectional
@@ -49,55 +47,52 @@ class Connectome(object):
         presynaptic_value = extract_value_customdict(mecotc,chemical_synapse[0])
         postsynaptic_value = extract_value_customdict(mecotc,chemical_synapse[1])
 
-        connector_idx = set(np.where(vertices_type == connector_value)[0])
+        connector_connectivity_pre_idx = np.where((connectivity_type == presynaptic_value))[0]
+        connector_connectivity_post_idx = np.where((connectivity_type == postsynaptic_value))[0]
 
-        # loop over connectivity and extract connectors
-        # need to build potentially all polyadic (MxN) connectors
-        # key: vertices connector index, value: skeleton id
-        pre = dict.fromkeys(connector_idx, [])
-        post = dict.fromkeys(connector_idx, [])
+        # {connid : {'pre': [preskelid1, preskelid2], 'post': [postskelid1, postskelid2]}}
 
-        for i, uv in enumerate(self.circuit.connectivity):
-            u, v = uv
-            print "u,v", u,v
-            if v in connector_idx:
-                print "found presynaptic"
-                # either presynaptic or gapjunction
-                # check if pre or post
-                if connectivity_type[i] == presynaptic_value:
-                    # retrieve associated skeleton identifier
-                    pre[v].append(connectivity_skeletonid[i])
+        ds = {}
+        for idx in connector_connectivity_pre_idx:
+            preidx, conidx = self.circuit.connectivity[idx]
+            skeletonid = connectivity_skeletonid[idx]
+            if ds.has_key(conidx):
+                if ds[conidx].has_key(const.PRESYNAPTIC):
+                    ds[conidx][const.PRESYNAPTIC].append( skeletonid )
+            else:
+                ds[conidx] = {}
+                ds[conidx][const.PRESYNAPTIC] = [skeletonid]
+
+        for idx in connector_connectivity_post_idx:
+            # assume correct directionality
+            conidx, postidx = self.circuit.connectivity[idx]
+            skeletonid = connectivity_skeletonid[idx]
+            if ds.has_key(conidx):
+                if ds[conidx].has_key(const.POSTSYNAPTIC):
+                    ds[conidx][const.POSTSYNAPTIC].append( skeletonid )
                 else:
-                    print("Gap junction found!")
+                    ds[conidx][const.POSTSYNAPTIC] = [skeletonid]
+            else:
+                ds[conidx] = {}
+                ds[conidx][const.POSTSYNAPTIC] = [skeletonid]
 
-            elif u in connector_idx:
-                print "found postsynaptic"
-                # either postsynaptic or gapjunction
-                if connectivity_type[i] == postsynaptic_value:
-                    # retrieve associated skeleton identifier
-                    post[u].append(connectivity_skeletonid[i])
-                else:
-                    print("Gap junction found")
-
+        # build graph
         G = nx.DiGraph()
         G.add_nodes_from(np.unique(connectivity_skeletonid))
-        # loop of connectors and add
-        for cid in connector_idx:
-            if not len(pre[cid]) == 0 and not len(post[cid]) == 0:
-                # add M times N connectivity to network
-                for u in pre[cid]:
-                    for v in post[cid]:
-                        # retrieve skeleton id for connectivity
-                        if G.has_edge(u, v):
-                            G.edge[u][v]['weight'] += 1
-                        else:
-                            G.add_edge(u, v, weight=1)
-            else:
-                print('Connector with either zero pre or post connectivity: {0}'.format(cid))
+        for k,v in ds.items():
+            for preskelid in v[const.PRESYNAPTIC]:
+                for postkelid in v[const.POSTSYNAPTIC]:
+                    if G.has_edge(preskelid, postkelid):
+                        G.edge[preskelid][postkelid]['synapse'] += 1
+                    else:
+                        G.add_edge(preskelid, postkelid, weight=1)
 
         return G
 
-    def skeleton_dict(self):
+    def get_skeleton_dict(self):
+        """ Return dictionary keyed by skeleton id containing as value
+        the skeletons as subgraph structure
+        """
         # retrieve unique identifiers of skeletons
         uniqueidarr = np.unique(
             self.circuit.get_connectivity_property(const.SKELETON_ID))
@@ -118,35 +113,3 @@ class Connectome(object):
             raise Exception("No unique skeleton identifiers found")
 
         return skeletons
-
-    @staticmethod
-    def fromcircuit(self, circuit):
-        """ Extract Connectome from Circuit using skeleton identifiers
-        to segregate the circuit
-
-        """
-
-        self.circuit = circuit
-
-        self.graph = self.circuit.asgraph(add_attributes=True)
-
-        self.graph = nx.DiGraph()
-        # add nodes from skeleton identifiers
-        self.graph.add_nodes_from( self.skeletons.keys() )
-
-        # loop over skeletons
-        for skeletonid, skeleton in self.skeletons.items():
-            # we require some semantics of the connections
-            # to correctly derive the high-level connectivity
-            # e.g. chemical synapses vs. gap junctions or other associations
-            # or also interpretation on the intrinsic connectivity of
-            # a skeleton (not every skeleton is bipolar for instance)
-            # it should be general enough
-            pass
-            
-        # extract all presynaptic connections
-            # loop over postsynaptic connections
-            # get skeleton id
-            # add relevant information to connectome (multi)
-            # e.g. also number of vertices in the postsynaptic skeleton (e.g.
-            # for partial or incomplete reconstructions)
