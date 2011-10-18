@@ -21,7 +21,12 @@ PRESYNAPTIC = 'presynaptic'
 POSTSYNAPTIC = 'postsynaptic'
 
 # gap junction
-GAP_JUNCTION = 'gapjunction'
+GAP_JUNCTION = 'connects_to_gap'
+
+# connectome level
+
+CONNECTOME_CHEMICAL_SYNAPSE = 'chemical synapse'
+CONNECTOME_ELECTRICAL_SYNAPSE = 'electrical synapse'
 
 space_unit_conversion = {
     'nm': 1,  # nanometer

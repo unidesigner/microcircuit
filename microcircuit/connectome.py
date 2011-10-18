@@ -19,18 +19,36 @@ class Connectome(object):
         if not circuit is None:
             # dictionary of skeleton objects keyed by their id
             self.skeletons = self.get_skeleton_dict()
-
             # NetworkX graph with nodes (skeletons) and edges (connectivity)
             self.graph = self.get_network_connectivity()
         else:
             self.skeletons = None
             self.graph = graph
 
+    def set_circuit(self, metadata=None, circuit=None):
+        """ Set a new circuit for the connectome object
+        """
+        if circuit is None:
+            return
+        else:
+            self.circuit = circuit
+
+        if not metadata is None:
+            self.metadata = metadata
+
+        # update the graph and skeletons
+        self.skeletons = self.get_skeleton_dict()
+        self.graph = self.get_network_connectivity()
+            
+
     def get_network_connectivity(self):
         """Extract a network from the input circuit where
         nodes are skeletons and edges are the number of synaptic
         connections
         """
+        if self.circuit is None:
+            return None
+
         metc = self.circuit.get_vertices_property(const.TYPE, True)[1]
         mecotc = self.circuit.get_connectivity_property(const.TYPE, True)[1]
 
@@ -42,13 +60,15 @@ class Connectome(object):
         # define valid transform of M:N connector pairs and whether directional
         # not directional implies bidirectional
         chemical_synapse = (const.PRESYNAPTIC, const.POSTSYNAPTIC, True)
-        gap_junctions = (const.GAP_JUNCTION, const.GAP_JUNCTION, False)
 
         presynaptic_value = extract_value_customdict(mecotc,chemical_synapse[0])
         postsynaptic_value = extract_value_customdict(mecotc,chemical_synapse[1])
+        gap_junction = extract_value_customdict(mecotc,const.GAP_JUNCTION)
 
         connector_connectivity_pre_idx = np.where((connectivity_type == presynaptic_value))[0]
         connector_connectivity_post_idx = np.where((connectivity_type == postsynaptic_value))[0]
+
+        connector_connectivity_gap_idx = np.where((connectivity_type == gap_junction))[0]
 
         # {connid : {'pre': [preskelid1, preskelid2], 'post': [postskelid1, postskelid2]}}
 
@@ -76,17 +96,68 @@ class Connectome(object):
                 ds[conidx] = {}
                 ds[conidx][const.POSTSYNAPTIC] = [skeletonid]
 
+        # add gap junctions
+        for idx in connector_connectivity_gap_idx:
+            gapidx, conidx = self.circuit.connectivity[idx]
+            skeletonid = connectivity_skeletonid[idx]
+            if ds.has_key(conidx):
+                if ds[conidx].has_key(const.GAP_JUNCTION):
+                    ds[conidx][const.GAP_JUNCTION].append( skeletonid )
+                else:
+                    ds[conidx][const.GAP_JUNCTION] = [skeletonid]
+            else:
+                ds[conidx] = {}
+                ds[conidx][const.GAP_JUNCTION] = [skeletonid]
+
         # build graph
         G = nx.DiGraph()
         G.add_nodes_from(np.unique(connectivity_skeletonid))
         for k,v in ds.items():
-            for preskelid in v[const.PRESYNAPTIC]:
-                for postkelid in v[const.POSTSYNAPTIC]:
-                    if G.has_edge(preskelid, postkelid):
-                        G.edge[preskelid][postkelid]['synapse'] += 1
-                    else:
-                        G.add_edge(preskelid, postkelid, weight=1)
+            # only loop when both pre and post exist
+            if v.has_key(const.PRESYNAPTIC) and v.has_key(const.POSTSYNAPTIC):
+                for preskelid in v[const.PRESYNAPTIC]:
+                    for postkelid in v[const.POSTSYNAPTIC]:
+                        if G.has_edge(preskelid, postkelid):
+                            G.edge[preskelid][postkelid][const.CONNECTOME_CHEMICAL_SYNAPSE] += 1
+                        else:
+                            G.add_edge(preskelid, postkelid, {const.CONNECTOME_CHEMICAL_SYNAPSE: 1})
+                            
+            # all-to-all for gap junctions (usually only two, if more, log)
+            if v.has_key(const.GAP_JUNCTION):
+                print 'gapjunct', v[const.GAP_JUNCTION]
+                if len(v[const.GAP_JUNCTION]) > 2:
+                    print("Gap junction with more than two partners found. Not counted.")
+                    continue
+                if len(v[const.GAP_JUNCTION]) < 2:
+                    print("Gap junction with less than two partners found. Not counted.")
+                    continue
 
+                preskelid = v[const.GAP_JUNCTION][0]
+                postskelid = v[const.GAP_JUNCTION][1]
+
+                # no self-loops
+                if preskelid == postskelid:
+                    continue
+                # because we are adding to a DiGraph, we need to check both ways
+                # need to be bidirectional (symmetrical)
+
+                G.add_edge(preskelid, postskelid)
+                print 'add edge', preskelid, postskelid
+                G.add_edge(postskelid, preskelid)
+                print 'add edge', postskelid, preskelid
+
+                if G.edge[preskelid][postskelid].has_key(const.CONNECTOME_ELECTRICAL_SYNAPSE):
+                    # already existing electrical synapse, add this one
+                    G.edge[preskelid][postskelid][const.CONNECTOME_ELECTRICAL_SYNAPSE] += 1
+                else:
+                    G.edge[preskelid][postskelid][const.CONNECTOME_ELECTRICAL_SYNAPSE] = 1
+
+                if G.edge[postskelid][preskelid].has_key(const.CONNECTOME_ELECTRICAL_SYNAPSE):
+                    # already existing electrical synapse, add this one
+                    G.edge[postskelid][preskelid][const.CONNECTOME_ELECTRICAL_SYNAPSE] += 1
+                else:
+                    # no existing electrical synapse, so we need to add the key
+                    G.edge[postskelid][preskelid][const.CONNECTOME_ELECTRICAL_SYNAPSE] = 1
         return G
 
     def get_skeleton_dict(self):
@@ -94,6 +165,9 @@ class Connectome(object):
         the skeletons as subgraph structure
         """
         # retrieve unique identifiers of skeletons
+        if self.circuit is None:
+            return None
+
         uniqueidarr = np.unique(
             self.circuit.get_connectivity_property(const.SKELETON_ID))
 

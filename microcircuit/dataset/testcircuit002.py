@@ -80,10 +80,10 @@ conn = np.array([[0, 1], # neurite 111
                 dtype=np.uint32)
 
 vertices_properties = {
-    "id": {"data": np.array(range(19), dtype=np.uint32)+100,
+    "id": {"data": np.array(range(20), dtype=np.uint32)+100,
            "metadata": {}
     },
-    "type": {"data": np.array([2,1,3,1,2,3,1,2,3,1,2,1,2,1,2,4,4,4,4], dtype=np.uint32),
+    "type": {"data": np.array([2,1,3,1,2,3,1,2,3,1,2,1,2,1,2,4,4,4,4,5], dtype=np.uint32),
              "metadata": {
                     "type": "categorial",
                     "value": {
@@ -92,6 +92,7 @@ vertices_properties = {
                         2: {"name": "skeleton root node", "ref": "XXX", "type":"skeleton"},
                         3: {"name": "connector node", "ref": "XXX", "type":"connector"}, # "chemical synapse"
                         4: {"name": "gap junction", "ref": "XXX", "type":"connector"}, # "gap junction"
+                        5: {"name": "neuromuscular junction", "ref": "XXX", "type":"connector"}, # "gap junction"
                     }
               }
     }
@@ -110,7 +111,7 @@ connectivity_properties = {
                         1: {"name": "neurite", "ref": "XXX"},
                         2: {"name": "presynaptic", "ref": "XXX"},
                         3: {"name": "postsynaptic", "ref": "XXX"},
-                        4: {"name": "gap junction", "ref": "XXX"},
+                        4: {"name": "connects_to_gap", "ref": "XXX"},
                         5: {"name": "neuromuscular junction"}
                     }
                 }
