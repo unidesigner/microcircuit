@@ -17,6 +17,8 @@ para = {
     }
 }
 nodes = connectome.graph.nodes()
-nodes = [111, 222, 333, 444, 555, 666]
-print nodes
-show(connectome, skeleton_order=nodes, use_label=True, display_parameters=para)
+print "nodes", nodes
+print "sorted", sorted(connectome.graph.nodes())
+#nodes = [111, 222, 333, 444, 555, 666]
+nodes = sorted(nodes)
+b=show(connectome, skeleton_order=nodes, use_label=True, display_parameters=para)

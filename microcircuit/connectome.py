@@ -68,7 +68,11 @@ class Connectome(object):
         connector_connectivity_pre_idx = np.where((connectivity_type == presynaptic_value))[0]
         connector_connectivity_post_idx = np.where((connectivity_type == postsynaptic_value))[0]
 
-        connector_connectivity_gap_idx = np.where((connectivity_type == gap_junction))[0]
+        gap_idx = np.where((connectivity_type == gap_junction))
+        if len(gap_idx)==0:
+            connector_connectivity_gap_idx = []
+        else:
+            connector_connectivity_gap_idx = gap_idx[0]
 
         # {connid : {'pre': [preskelid1, preskelid2], 'post': [postskelid1, postskelid2]}}
 
@@ -142,9 +146,7 @@ class Connectome(object):
                 # need to be bidirectional (symmetrical)
 
                 G.add_edge(preskelid, postskelid)
-                print 'add edge', preskelid, postskelid
                 G.add_edge(postskelid, preskelid)
-                print 'add edge', postskelid, preskelid
 
                 if G.edge[preskelid][postskelid].has_key(const.CONNECTOME_ELECTRICAL_SYNAPSE):
                     # already existing electrical synapse, add this one

@@ -1,6 +1,7 @@
 import networkx as nx
 import types
 import pylab
+from copy import copy
 
 # wrap fos display of circuit
 
@@ -15,22 +16,35 @@ def show(connectome, skeleton_order, use_label, display_parameters):
         raise Exception("Connectome needs to have a valid graph")
 
     labels = []
-    for ele in skeleton_order:
-        labels.append( connectome.metadata[ele]['name'] )
+
+    if use_label and not connectome.metadata is None:
+        for ele in skeleton_order:
+            if connectome.metadata.has_key(ele):
+                labels.append( connectome.metadata[ele]['name'] )
+    else:
+        labels = skeleton_order
     print "labels", labels
 
-    fig = pylab.figure()
-    ax = fig.add_subplot(111)
+    nr_labels = len(labels)
 
+    fig = pylab.figure()
+
+    ax = fig.add_subplot(111)
+    ax.autoscale_view(scalex=False,scaley=False)
+    
     ax.set_ylabel('Neurons')
-    ax.set_yticks(range(len(labels)))
     labels.reverse()
+    ax.set_yticks(range(nr_labels))
     ax.set_yticklabels(labels)
 
     ax.set_xlabel('Neurons')
-    ax.set_xticks(range(len(labels)))
-    labels.reverse()
-    ax.set_xticklabels(labels) # reverse back
+    ax.set_xticks(range(nr_labels))
+    labelsx = copy(labels)
+    labelsx.reverse()
+    ax.set_xticklabels(labelsx) # reverse back
+
+    ax.xaxis.set_label_position("top")
+    ax.xaxis.set_ticks_position("top")
 
     for relation, para in display_parameters.items():
 
@@ -59,7 +73,7 @@ def show(connectome, skeleton_order, use_label, display_parameters):
                 continue
             if data.has_key(relation):
                 x.append(skeleton_order.index(u))
-                y.append(skeleton_order.index(v))
+                y.append(nr_labels-skeleton_order.index(v))
                 if not scalelist is None:
                     scalelist.append(scale(data[relation]))
         y.reverse()
@@ -70,4 +84,8 @@ def show(connectome, skeleton_order, use_label, display_parameters):
         else:
             pylab.scatter(x, y, s=scalelist, c=color,marker=mark)
 
+    ax.set_ybound(-0.5, len(labels)-0.5)
+    ax.set_xbound(-0.5, len(labels)-0.5)
     pylab.show()
+
+    return fig
