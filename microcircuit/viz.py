@@ -41,15 +41,15 @@ def show(connectome, skeleton_order, use_label, display_parameters):
     ax.set_xlabel('Neurons')
     ax.set_xticks(range(nr_labels))
     labelsx = copy(labels)
-    print "labelsx", labelsx
+    #print "labelsx", labelsx
     #labelsx.reverse()
-    print "labelsx reversed", labelsx
+    #print "labelsx reversed", labelsx
     ax.set_xticklabels(labelsx) # reverse back
 
     ax.xaxis.set_label_position("top")
     ax.xaxis.set_ticks_position("top")
 
-    print "skeleton order", skeleton_order
+    #print "skeleton order", skeleton_order
     for relation, para in display_parameters.items():
 
         # scaling for each
@@ -73,27 +73,25 @@ def show(connectome, skeleton_order, use_label, display_parameters):
         else:
             scalelist = None
         for u,v,data in connectome.graph.edges_iter(data=True):
-            print "edge", u, v
             if not (u in skeleton_order and v in skeleton_order):
                 continue
             if data.has_key(relation):
-                print 'found realation', relation
                 x.append( len(skeleton_order)-1-skeleton_order.index(u) )
-                print "found u at index i, to new", u, skeleton_order.index(u), len(skeleton_order)-1-skeleton_order.index(u)
+                #print "found u at index i, to new", u, skeleton_order.index(u), len(skeleton_order)-1-skeleton_order.index(u)
                 y.append( skeleton_order.index(v) )
-                print "found v at index i, to new", v, skeleton_order.index(v), skeleton_order.index(v)
+                #print "found v at index i, to new", v, skeleton_order.index(v), skeleton_order.index(v)
                 if not scalelist is None:
                     scalelist.append(scale(data[relation]))
         
-        print x,y,scalelist,scale,color,mark
-
+        #print x,y,scalelist,scale,color,mark
+        # TODO: problem with visibility depending on the order?
         if scalelist is None and not scale is None: # TODO: correct?
             pylab.scatter(x, y, s=scale, c=color,marker=mark)
         else:
             pylab.scatter(x, y, s=scalelist, c=color,marker=mark)
 
-    #ax.set_ybound(-0.5, len(labels)-0.5)
-    #ax.set_xbound(-0.5, len(labels)-0.5)
+    ax.set_ybound(-0.5, len(labels)-0.5)
+    ax.set_xbound(-0.5, len(labels)-0.5)
     pylab.show()
 
     return fig
