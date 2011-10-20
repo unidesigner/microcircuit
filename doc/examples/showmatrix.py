@@ -1,6 +1,6 @@
 import microcircuit.constants as const
 from microcircuit.viz import show
-from microcircuit.dataset.testcircuit002 import testcircuit as tc
+from microcircuit.dataset.testcircuit001 import testcircuit as tc
 from microcircuit.transforms.modularization import create_wiring_diagram
 
 connectome = create_wiring_diagram(tc)
