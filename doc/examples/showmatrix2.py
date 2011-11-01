@@ -6,11 +6,13 @@ from microcircuit.connectome import Connectome
 a=nx.DiGraph()
 a.add_edge(1,2, {const.CONNECTOME_CHEMICAL_SYNAPSE:1, const.CONNECTOME_ELECTRICAL_SYNAPSE:2})
 a.add_edge(2,1, {const.CONNECTOME_ELECTRICAL_SYNAPSE:2})
-
+a.add_edge(1,1, {const.CONNECTOME_ELECTRICAL_SYNAPSE:10})
+a.add_edge(3,3, {const.CONNECTOME_ELECTRICAL_SYNAPSE:10})
 me = {'name' : 'testcircuit00244',
             'neuronmap': {
                 1: {'name':'A', 'type': 'Sensory neuron'},
-                2: {'name':'B', 'type': 'Interneuron'}
+                2: {'name':'B', 'type': 'Interneuron'},
+                3: {'name':'C', 'type': 'Motorneuron'}
             }}
 
 connectome = Connectome(metadata=me['neuronmap'], graph=a)
