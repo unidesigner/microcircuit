@@ -1,6 +1,9 @@
 
 # skeleton identifiers grouping the connective into individual morphologies
-SKELETON_ID = 'id'
+SKELETON_ID = 'skeletonid'
+
+# Location key
+LOCATION = 'location'
 
 # type of vertices or connectivity
 TYPE = 'type'

@@ -76,12 +76,9 @@ class Circuit(CircuitBase):
                              metadata,
                              vertices_properties,
                              connectivity_properties)
-        # dictionary to map from index to id if it exists
-        if const.SKELETON_ID in self.vertices_properties:
-            a = self.get_vertices_property(const.SKELETON_ID)
-            self.map_vertices_idx2id = dict(zip(range(len(a)), a))
-        else:
-            self.map_vertices_idx2id = None
+
+        # map from vertices identifiers to indices
+        self.map_vertices_id2index = dict(zip(vertices,range(len(vertices))))
 
     def asgraph(self, add_attributes=False):
         """ Return circuit as graph
@@ -105,16 +102,21 @@ class Circuit(CircuitBase):
             zip(self.connectivity[:, 0], self.connectivity[:, 1]))
         if add_attributes:
             G.graph = self.metadata
+            location = self.get_vertices_property(const.LOCATION)
             # add vertices attributes
-            for idx, d in G.nodes_iter(data=True):
-                d['location'] = self.vertices[idx, :]
+            for id, d in G.nodes_iter(data=True):
+                idx=self.map_vertices_id2index[id]
+                d['location'] = location[idx, :]
                 for name, value in self.vertices_properties.items():
+                    if const.LOCATION == name:
+                        continue
                     d[name] = value['data'][idx]
             # add connectivity attributes
             for idx, co in enumerate(self.connectivity):
+                s,e=self.map_vertices_id2index[co[0]],self.map_vertices_id2index[co[1]]
                 for name, value in self.connectivity_properties.items():
                     G.edge[co[0]][co[1]][name] = value['data'][idx]
                 # compute euclidian length
                 G.edge[co[0]][co[1]]['length'] = np.linalg.norm(
-                        (self.vertices[co[1]] - self.vertices[co[0]]))
+                        (location[e] - location[s]))
         return G

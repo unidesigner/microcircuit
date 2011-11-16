@@ -1,29 +1,26 @@
 import numpy as np
-
-from .. import Circuit
+from microcircuit import Circuit
 
 metadata = {'name' : 'testcircuit001'}
 
-vert = np.array([[0, 0, 0],    # skeleton node (root)
+vert = np.array([10, 11, 200, 20, 21, 22], dtype=np.uint32)
+
+conn = np.array([[10, 11],   # axonal
+                 [11, 200],   # presyn
+                 [200, 20],   # postsyn
+                 [20, 21],   # dendritic
+                 [21, 22]],  # dendritic
+                 dtype=np.uint32)
+
+vertices_properties = {
+    "location": {"data": np.array([[0, 0, 0],    # skeleton node (root)
                  [5, 5, 0],    # skeleton node
                  [10, 3, 0],   # connector
                  [15, 5, 0],   # skeleton node
                  [18, 0, 0],   # skeleton node (root)
                  [20, 0, 0]],  # skeleton node
                  dtype=np.float32)
-
-conn = np.array([[0, 1],   # axonal
-                 [1, 2],   # presyn
-                 [2, 3],   # postsyn
-                 [3, 4],   # dendritic
-                 [4, 5]],  # dendritic
-                 dtype=np.uint32)
-
-vertices_properties = {
-    "id": {"data": np.array([10, 11, 200, 20, 21, 22], dtype=np.uint32),
-           "metadata": {}},
-    # TODO: per node id, or skeletonid (but not for connector)
-
+    },
     "type": {"data": np.array([3, 1, 2, 1, 3, 1], dtype=np.uint32),
              "metadata": {
                     "type": "categorial",
@@ -38,7 +35,7 @@ vertices_properties = {
 }
 
 connectivity_properties = {
-    "id": {"data": np.array([100, 100, 500, 500, 500], dtype=np.uint32),
+    "skeletonid": {"data": np.array([100, 100, 500, 500, 500], dtype=np.uint32),
             "metadata": {}
     },
     "type": {"data": np.array([1, 2, 3, 4, 4], dtype=np.uint32),
