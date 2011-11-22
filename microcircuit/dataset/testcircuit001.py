@@ -54,7 +54,8 @@ connectivity_properties = {
 }
 
 testcircuit = Circuit(
-        vertices=vert, connectivity=conn,
+        vertices=vert,
+        connectivity=conn,
         vertices_properties=vertices_properties,
         connectivity_properties=connectivity_properties,
         metadata=metadata

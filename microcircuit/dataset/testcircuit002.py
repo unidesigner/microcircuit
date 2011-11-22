@@ -16,7 +16,7 @@ Properties of the Caenorhabditis elegans Neuronal Network. PLoS Comput Biol
 """
 import numpy as np
 
-from .. import Circuit
+from microcircuit import Circuit
 
 metadata = {'name' : 'testcircuit002',
             'neuronmap': {
@@ -28,29 +28,6 @@ metadata = {'name' : 'testcircuit002',
                 555: {'name':'I3', 'type': 'Interneuron'},
                 666: {'name':'I4', 'type': 'Interneuron'}
             }}
-
-vert = np.array([[0, 0, 0],    # S1: skeleton node (root)
-                 [0, -5, 0],   # S1: skeleton node
-                 [0, -10, 0],  # S1-I1: connector
-                 [0, -15, 0],  # I1: skeleton node
-                 [0, -20, 0],  # I1: skeleton node (root)
-                 [0, -25, 0],  # I1-I2: connector
-                 [0, -30, 0],  # I2: skeleton node
-                 [0, -35, 0],  # I2: skeleton node (root)
-                 [0, -40, 0],  # I2-M1: connector
-                 [0, -45, 0],  # M1: skeleton node
-                 [0, -50, 0],  # M1: skeleton node (root)
-                 [10, -25, 0],  # I3: skeleton node
-                 [15, -25, 0],  # I3: skeleton node (root)
-                 [-10, -25, 0],  # I4: skeleton node
-                 [-15, -25, 0],  # I4: skeleton node (root)
-                 [5, -22.5, 0],  # I1-I3: connector
-                 [5, -27.5, 0],  # I3-I2: connector
-                 [-5, -22.5, 0],  # I1-I4: connector
-                 [-5, -27.5, 0],  # I4-I2: connector
-                 [2, -50, 0],  # M1-MU1: connector
-                 ],
-                 dtype=np.float32)
 
 
 conn = np.array([[0, 1], # neurite 111
@@ -77,12 +54,34 @@ conn = np.array([[0, 1], # neurite 111
                 [6,18], # gap junction
 
                 ],
-                dtype=np.uint32)
+                dtype=np.uint32)+100
+
+vert = np.array(range(20), dtype=np.uint32)+100
 
 vertices_properties = {
-    "id": {"data": np.array(range(20), dtype=np.uint32)+100,
-           "metadata": {}
-    },
+    "location": {"data": np.array([[0, 0, 0],    # S1: skeleton node (root)
+                 [0, -5, 0],   # S1: skeleton node
+                 [0, -10, 0],  # S1-I1: connector
+                 [0, -15, 0],  # I1: skeleton node
+                 [0, -20, 0],  # I1: skeleton node (root)
+                 [0, -25, 0],  # I1-I2: connector
+                 [0, -30, 0],  # I2: skeleton node
+                 [0, -35, 0],  # I2: skeleton node (root)
+                 [0, -40, 0],  # I2-M1: connector
+                 [0, -45, 0],  # M1: skeleton node
+                 [0, -50, 0],  # M1: skeleton node (root)
+                 [10, -25, 0],  # I3: skeleton node
+                 [15, -25, 0],  # I3: skeleton node (root)
+                 [-10, -25, 0],  # I4: skeleton node
+                 [-15, -25, 0],  # I4: skeleton node (root)
+                 [5, -22.5, 0],  # I1-I3: connector
+                 [5, -27.5, 0],  # I3-I2: connector
+                 [-5, -22.5, 0],  # I1-I4: connector
+                 [-5, -27.5, 0],  # I4-I2: connector
+                 [2, -50, 0],  # M1-MU1: connector
+                 ],
+                 dtype=np.float32),
+                "metadata":{}},
     "type": {"data": np.array([2,1,3,1,2,3,1,2,3,1,2,1,2,1,2,4,4,4,4,5], dtype=np.uint32),
              "metadata": {
                     "type": "categorial",
@@ -119,7 +118,8 @@ connectivity_properties = {
 }
 
 testcircuit = Circuit(
-        vertices=vert, connectivity=conn,
+        vertices=vert,
+        connectivity=conn,
         vertices_properties=vertices_properties,
         connectivity_properties=connectivity_properties,
         metadata=metadata
