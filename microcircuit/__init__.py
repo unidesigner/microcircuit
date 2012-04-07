@@ -17,7 +17,7 @@ The module has several sub-modules:
 __docformat__ = 'restructuredtext'
 
 from .version import  __version__
-from .circuit import Circuit
+from .circuit import *
 
 import transforms
 import simulator

@@ -1,6 +1,9 @@
 import networkx as nx
 import types
-import pylab
+try:
+    import pylab
+except:
+    pass
 from copy import copy
 
 # wrap fos display of circuit

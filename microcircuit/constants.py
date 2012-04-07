@@ -18,10 +18,10 @@ METADATA = 'metadata'
 CONNECTOR_NODE = 'connector node'
 
 # presynaptic connectivity
-PRESYNAPTIC = 'presynaptic'
+PRESYNAPTIC = 'presynaptic_to'
 
 # postsynaptic connectivity
-POSTSYNAPTIC = 'postsynaptic'
+POSTSYNAPTIC = 'postsynaptic_to'
 
 # gap junction
 GAP_JUNCTION = 'connects_to_gap'
