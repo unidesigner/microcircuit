@@ -83,7 +83,6 @@ class Skeleton(object):
         incoming = {}
         for u, v, d in self.graph.edges_iter(data=True):
             if d['type'] == 'postsynaptic_to':
-                print 'should be connector', self.graph.node[v]
                 incoming[v] = self.graph.node[v]
                 # TODO: number of nodes in the target skeleton?
         return incoming
@@ -120,6 +119,12 @@ class Circuit(CircuitBase):
         # map from vertices identifiers to indices
         self.map_vertices_id2index = dict(zip(self.vertices,range(len(self.vertices))))
 
+    def get_all_skeletons(self):
+        """ Returns a list of all skeleton ids
+        """
+        # TODO: len should be equal to metadata entry
+        return list(np.unique(self.connectivity_properties['skeletonid']['data']))
+
     def get_skeleton(self, skeleton_id ):
         """ Return skeleton object
         """
@@ -145,7 +150,8 @@ class Circuit(CircuitBase):
                     raise Exception('Invalid NeuroHDF. Skeleton with id {0} has no associated data'.format(skeleton_id))
             print 'debug: vertidx', vertidx
         else:
-            print 'debug: conidx', conidx
+            pass
+            #print 'debug: conidx', conidx
 
         g = nx.DiGraph()
         if len(conidx) != 0:
@@ -161,13 +167,15 @@ class Circuit(CircuitBase):
             typedict = {}
             for i,k in enumerate(typevals):
                 typedict[typevals[i]] = typename[i]
-
+            inv_typedict = dict((v,k) for k, v in typedict.iteritems())
+            print typedict, inv_typedict['postsynaptic_to']
             verttypemeta = self.vertices_properties['type']['metadata']
             verttypevals = verttypemeta['value_name']['value']
             verttypename = verttypemeta['value_name']['name']
             verttypedict = {}
             for i,k in enumerate(verttypevals):
                 verttypedict[verttypevals[i]] = verttypename[i]
+            inv_verttypedict = dict((v,k) for k, v in verttypedict.iteritems())
 
             vertices_unique = np.unique(self.connectivity[conidx,:])
             for id in vertices_unique:
@@ -188,14 +196,38 @@ class Circuit(CircuitBase):
                 g.edge[from_id][to_id]['type'] = typedict[self.connectivity_properties['type']['data'][i]]
                 dist = np.abs( g.node[to_id]['location'] - g.node[from_id]['location'] )
                 g.edge[from_id][to_id]['length'] = np.linalg.norm( dist )
-                print 'dist', dist, g.edge[from_id][to_id]['length']
+
+                # TODO: connector node holds list of target skeleton ids
+                # if typedict presynaptic
+                #print typedict[self.connectivity_properties['type']['data'][i]]
+                if typedict[self.connectivity_properties['type']['data'][i]] == 'presynaptic_to':
+                    #print 'should be postsyan id', inv_typedict['postsynaptic_to']
+                    # TODO: could be filtered by skeleton id
+                    # It's a feature, not a bug: This does discard single terminals!
+                    target_conn_indices = np.where( (self.connectivity[:,1] == to_id) & \
+                            (self.connectivity_properties['type']['data'] == inv_typedict['postsynaptic_to']) )[0]
+                    targetnodes = self.connectivity[target_conn_indices,0]
+                    target_skeleton_list = []
+                    for nid in targetnodes:
+                        target_skeleton_list.append( self.connectivity_properties['skeletonid']['data'][self.map_vertices_id2index[nid]] )
+                    g.node[to_id]['target_skeleton_ids'] = target_skeleton_list
+                    g.node[to_id]['target_node_ids'] = targetnodes
+                elif typedict[self.connectivity_properties['type']['data'][i]] == 'postsynaptic_to':
+                    source_conn_indices = np.where( (self.connectivity[:,1] == to_id) &\
+                            (self.connectivity_properties['type']['data'] == inv_typedict['presynaptic_to']))[0]
+                    sourcenodes = self.connectivity[source_conn_indices,0]
+                    source_skeleton_list = []
+                    for nid in sourcenodes:
+                        source_skeleton_list.append( self.connectivity_properties['skeletonid']['data'][self.map_vertices_id2index[nid]] )
+                    g.node[to_id]['source_skeleton_ids'] = source_skeleton_list
+                    g.node[to_id]['source_node_ids'] = sourcenodes
 
         else:
             if vertidx:
                 pass
 
-        # connector node holds list of target skeleton ids
-        print 'graph', g.nodes(data=True), g.edges(data=True)
+
+
         return Skeleton(
             id = skeleton_id,
             allnames = extracted_names,
