@@ -17,6 +17,7 @@ class CircuitBase(object):
         self.vertices_properties = {}
         self.connectivity_properties = {}
         self.metadata = {}
+        self.map_vertices_id2index = {}
         self.space_unit = space_unit
 
     def get_vertices_property(self, key, metadata=False):
@@ -69,12 +70,41 @@ class Skeleton(object):
         """
         return self.graph.number_of_nodes()
 
+    def get_downstream_skeletons(self):
+        """ Return downstream skeleton ids and number of connectors
+        """
+        outconnectors = self.get_outgoing_connector_nodes()
+        skeletons = {}
+        for k,v in outconnectors:
+            for skid in v['target_skeleton_ids']:
+                if skid in skeletons:
+                    skeletons['synaptic_count'] += 1
+                else:
+                    skeletons[skid] = dict.fromkeys(['synaptic_count'],1)
+        return skeletons
+
+    def get_upstream_skeletons(self):
+        """ Return upstream skeleton ids and number of connectors
+        """
+        inconnectors = self.get_incoming_connector_nodes()
+        skeletons = {}
+        for k,v in inconnectors:
+            for skid in v['source_skeleton_ids']:
+                if skid in skeletons:
+                    skeletons['synaptic_count'] += 1
+                else:
+                    skeletons[skid] = dict.fromkeys(['synaptic_count'],1)
+        return skeletons
+
     def get_outgoing_connector_nodes(self):
         """ Returns a dictionary keyed by connector node id and
         their associated data like a list of target skeleton ids
         """
-        # TODO
-        pass
+        incoming = {}
+        for u, v, d in self.graph.edges_iter(data=True):
+            if d['type'] == 'presynaptic_to':
+                incoming[v] = self.graph.node[v]
+        return incoming
 
     def get_incoming_connector_nodes(self):
         """ Returns a dictionary keyed by connector node id and
@@ -84,7 +114,6 @@ class Skeleton(object):
         for u, v, d in self.graph.edges_iter(data=True):
             if d['type'] == 'postsynaptic_to':
                 incoming[v] = self.graph.node[v]
-                # TODO: number of nodes in the target skeleton?
         return incoming
 
     def get_neuron_name(self):
@@ -102,13 +131,6 @@ class Skeleton(object):
 
 
 class Circuit(CircuitBase):
-
-    vertices = {}
-    connectivity = {}
-    vertices_properties = {}
-    connectivity_properties = {}
-    metadata = {}
-    map_vertices_id2index = {}
 
     def __init__(self):
         """ Initialize a neural circuit
@@ -128,7 +150,7 @@ class Circuit(CircuitBase):
     def get_skeleton(self, skeleton_id ):
         """ Return skeleton object
         """
-        # is the skeletonid found at all in this circuit?
+        # TODO: is the skeletonid found at all in this circuit?
 
         # extract allname
         strname_idx = np.where(self.metadata['skeleton_name']['data']['skeletonid']==skeleton_id)[0][0]
@@ -142,11 +164,11 @@ class Circuit(CircuitBase):
 
         # if none found using the connectivity property, this may happen for skeletons
         # with a single treenode, so look up the skeletonid as a vertex property
-        if len(conidx) == 0:
+        if not len(conidx):
             conidx = None
             if self.connectivity_properties.has_key('skeletonid'):
                 vertidx = np.where(self.connectivity_properties['skeletonid']['data']==skeleton_id)[0]
-                if len(vertidx) == 0:
+                if not len(vertidx):
                     raise Exception('Invalid NeuroHDF. Skeleton with id {0} has no associated data'.format(skeleton_id))
             print 'debug: vertidx', vertidx
         else:
@@ -154,7 +176,7 @@ class Circuit(CircuitBase):
             #print 'debug: conidx', conidx
 
         g = nx.DiGraph()
-        if len(conidx) != 0:
+        if len(conidx):
             g.add_edges_from( zip(self.connectivity[conidx, 0], self.connectivity[conidx, 1]) )
 
             # FIXME: there seems to be an issue when converting the name to string
@@ -175,7 +197,6 @@ class Circuit(CircuitBase):
             verttypedict = {}
             for i,k in enumerate(verttypevals):
                 verttypedict[verttypevals[i]] = verttypename[i]
-            inv_verttypedict = dict((v,k) for k, v in verttypedict.iteritems())
 
             vertices_unique = np.unique(self.connectivity[conidx,:])
             for id in vertices_unique:
@@ -192,18 +213,15 @@ class Circuit(CircuitBase):
             for i in conidx:
                 from_id = self.connectivity[i,0]
                 to_id = self.connectivity[i,1]
-                # apply the function to each element
+
                 g.edge[from_id][to_id]['type'] = typedict[self.connectivity_properties['type']['data'][i]]
                 dist = np.abs( g.node[to_id]['location'] - g.node[from_id]['location'] )
                 g.edge[from_id][to_id]['length'] = np.linalg.norm( dist )
 
-                # TODO: connector node holds list of target skeleton ids
-                # if typedict presynaptic
                 #print typedict[self.connectivity_properties['type']['data'][i]]
                 if typedict[self.connectivity_properties['type']['data'][i]] == 'presynaptic_to':
-                    #print 'should be postsyan id', inv_typedict['postsynaptic_to']
-                    # TODO: could be filtered by skeleton id
-                    # It's a feature, not a bug: This does discard single terminals!
+                    # It's a feature, not a bug: This does discard single
+                    # node skeletons!
                     target_conn_indices = np.where( (self.connectivity[:,1] == to_id) & \
                             (self.connectivity_properties['type']['data'] == inv_typedict['postsynaptic_to']) )[0]
                     targetnodes = self.connectivity[target_conn_indices,0]
@@ -225,8 +243,6 @@ class Circuit(CircuitBase):
         else:
             if vertidx:
                 pass
-
-
 
         return Skeleton(
             id = skeleton_id,
