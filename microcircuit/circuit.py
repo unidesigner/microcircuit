@@ -75,10 +75,10 @@ class Skeleton(object):
         """
         outconnectors = self.get_outgoing_connector_nodes()
         skeletons = {}
-        for k,v in outconnectors:
+        for k,v in outconnectors.items():
             for skid in v['target_skeleton_ids']:
                 if skid in skeletons:
-                    skeletons['synaptic_count'] += 1
+                    skeletons[skid]['synaptic_count'] += 1
                 else:
                     skeletons[skid] = dict.fromkeys(['synaptic_count'],1)
         return skeletons
@@ -88,10 +88,10 @@ class Skeleton(object):
         """
         inconnectors = self.get_incoming_connector_nodes()
         skeletons = {}
-        for k,v in inconnectors:
+        for k,v in inconnectors.items():
             for skid in v['source_skeleton_ids']:
                 if skid in skeletons:
-                    skeletons['synaptic_count'] += 1
+                    skeletons[skid]['synaptic_count'] += 1
                 else:
                     skeletons[skid] = dict.fromkeys(['synaptic_count'],1)
         return skeletons
@@ -146,6 +146,32 @@ class Circuit(CircuitBase):
         """
         # TODO: len should be equal to metadata entry
         return list(np.unique(self.connectivity_properties['skeletonid']['data']))
+
+    def get_subgraph(self, skeleton_ids):
+        """ Returns a directed NetworkX subgraph
+        """
+        g = nx.DiGraph()
+        skeletons = {}
+        for skid in skeleton_ids:
+            skeletons[skid] = self.get_skeleton( skid )
+            g.add_node( skid, {'number_of_nodes': skeletons[skid].number_of_nodes(),
+                               'total_length': skeletons[skid].get_total_length(),
+                               'neuron_name': skeletons[skid].get_neuron_name() } )
+        # add connectivity
+        for skid, skeleton in skeletons.items():
+            down_skeletons = skeleton.get_downstream_skeletons()
+            for downid, d in down_skeletons.items():
+                # only add edge for skeleton in target set
+                if downid in skeleton_ids:
+                    g.add_edge( skid, downid, {'synaptic_count': d['synaptic_count'] })
+
+            up_skeletons = skeleton.get_upstream_skeletons()
+            for upid, d in up_skeletons.items():
+                # only add edge for skeleton in target set
+                if upid in skeleton_ids:
+                    g.add_edge( upid, skid, {'synaptic_count': d['synaptic_count'] })
+
+        return g
 
     def get_skeleton(self, skeleton_id ):
         """ Return skeleton object
