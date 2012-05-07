@@ -232,7 +232,9 @@ class Circuit(CircuitBase):
                     'type': verttypedict[self.vertices_properties['type']['data'][vertex_index]],
                     'confidence': self.vertices_properties['confidence']['data'][vertex_index],
                     'radius': self.vertices_properties['radius']['data'][vertex_index],
-                    'userid': self.vertices_properties['userid']['data'][vertex_index]
+                    'userid': self.vertices_properties['userid']['data'][vertex_index],
+                    'creation_time': self.vertices_properties['creation_time']['data'][vertex_index],
+                    'modification_time': self.vertices_properties['modification_time']['data'][vertex_index]
                 })
 
             # add connectivity properties
@@ -243,6 +245,9 @@ class Circuit(CircuitBase):
                 g.edge[from_id][to_id]['type'] = typedict[self.connectivity_properties['type']['data'][i]]
                 dist = np.abs( g.node[to_id]['location'] - g.node[from_id]['location'] )
                 g.edge[from_id][to_id]['length'] = np.linalg.norm( dist )
+
+                dist = np.abs( g.node[to_id]['creation_time'] - g.node[from_id]['creation_time'] )
+                g.edge[from_id][to_id]['delta_creation_time'] = np.linalg.norm( dist )
 
                 #print typedict[self.connectivity_properties['type']['data'][i]]
                 if typedict[self.connectivity_properties['type']['data'][i]] == 'presynaptic_to':
