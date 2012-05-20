@@ -1,6 +1,6 @@
-=====================
+======================
  Microcircuit package
-=====================
+======================
 
 Keywords: Neural circuit, Connectome, Microcircuit, Connectomics,
 Microcircuitry, Brain Circuit, Wiring diagram, Computational neuroanatomy,

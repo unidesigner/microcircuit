@@ -3,5 +3,5 @@
 Authors
 =======
 
-  * Stephan Gerhard <connectome@unidesign.ch> 2011
+* Stephan Gerhard <connectome@unidesign.ch>
   
