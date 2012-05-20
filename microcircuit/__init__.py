@@ -18,9 +18,8 @@ __docformat__ = 'restructuredtext'
 
 from .version import  __version__
 from .circuit import *
+from .io import *
 
-import transforms
-import simulator
 import dataset
 import constants
 import viz
