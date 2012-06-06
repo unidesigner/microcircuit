@@ -51,10 +51,10 @@ class Connectome(object):
         if self.circuit is None:
             return None
 
-        metc = self.circuit.get_vertices_property(const.TYPE, True)[1]
+        #metc = self.circuit.get_vertices_property(const.TYPE, True)[1]
         mecotc = self.circuit.get_connectivity_property(const.TYPE, True)[1]
 
-        vertices_type = self.circuit.get_vertices_property(const.TYPE)
+        #vertices_type = self.circuit.get_vertices_property(const.TYPE)
         # can select pre, post, gap
         connectivity_type = self.circuit.get_connectivity_property(const.TYPE)
         connectivity_skeletonid = self.circuit.get_connectivity_property(const.SKELETON_ID)

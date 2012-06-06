@@ -2,6 +2,7 @@ import numpy as np
 import h5py
 
 import constants as const
+from circuit import Circuit
 
 def load_neurohdf(filename, hdf5path, memmapped=False):
     """ Loads the circuit from a NeuroHDF file as exported from CATMAID
