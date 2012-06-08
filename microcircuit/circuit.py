@@ -4,6 +4,8 @@ import h5py
 
 import constants as const
 
+DEBUG = False
+
 class CircuitBase(object):
 
     def __init__(self, space_unit='nm'):
@@ -171,6 +173,58 @@ class Circuit(CircuitBase):
                     g.add_edge( upid, skid, {'synaptic_count': d['synaptic_count'] })
 
         return g
+
+    def get_fos_microcircuit(self, skeleton_id, scale_factor = 1.):
+        """ Returns a fos microcircuit actor
+
+        Parameters
+        ----------
+        scale_factor : float
+            Divide the vertices coordinates by this factor
+        """
+        conidx = np.where(self.connectivity_properties['skeletonid']['data']==skeleton_id)[0]
+
+        # connectivity
+        connectivity_id = self.connectivity[conidx]
+        if DEBUG:
+            print 'connectivity id', connectivity_id, connectivity_id.shape
+
+        # map to new index based array
+        connectivity_indices = np.zeros( connectivity_id.shape, dtype=np.uint32 )
+        for i,c in enumerate(connectivity_id):
+            connectivity_indices[i,0]=self.map_vertices_id2index[connectivity_id[i,0]]
+            connectivity_indices[i,1]=self.map_vertices_id2index[connectivity_id[i,1]]
+        if DEBUG:
+            print 'connectivity indices', connectivity_indices, connectivity_indices.shape
+
+        connectivity_type = self.connectivity_properties['type']['data'][conidx]
+        if DEBUG:
+            print 'connectivity type', connectivity_type, connectivity_type.shape
+
+        vertices_location = self.vertices_properties['location']['data'][ connectivity_indices.ravel() ].astype(np.float32) / scale_factor
+        if DEBUG:
+            print 'vertices_location', vertices_location, vertices_location.shape
+
+        # connectivity is now simplified to the reduced array
+        connectivity_skeleton_with_synapse = np.array( range(len(vertices_location)), dtype = np.uint32 )
+        connectivity_skeleton_with_synapse = connectivity_skeleton_with_synapse.reshape( (len(connectivity_skeleton_with_synapse)/2, 2) )
+        if DEBUG:
+            print 'connectivity_skeleton_with_synapse', connectivity_skeleton_with_synapse, connectivity_skeleton_with_synapse.shape
+
+        connectivity_skeletonid = skeleton_id * np.ones( connectivity_type.shape, dtype = np.uint32 )
+        miin = connectivity_skeletonid.min()
+        if DEBUG:
+            print 'connectivity skeletonid', connectivity_skeletonid, connectivity_skeletonid.shape
+
+        return skeleton_id, vertices_location, connectivity_skeleton_with_synapse, connectivity_skeletonid, miin, connectivity_type
+
+    def get_skeleton_allnames(self, skeleton_id ):
+        strname_idx = np.where(self.metadata['skeleton_name']['data']['skeletonid']==skeleton_id)[0][0]
+        strname = self.metadata['skeleton_name']['data']['name'][strname_idx]
+        return strname.split('|')
+
+    def get_skeleton_number_of_nodes(self, skeleton_id ):
+        return len(np.where(self.vertices_properties['skeletonid']['data']==skeleton_id)[0])
 
     def get_skeleton(self, skeleton_id ):
         """ Return skeleton object
