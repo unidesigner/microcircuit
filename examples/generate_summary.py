@@ -43,7 +43,7 @@ conn_color_map = {
 miin=connectivity_skeletonid.min()-1
 connectivity_skeletonid = connectivity_skeletonid-miin
 
-w = Window( width = 1200, height = 800, bgcolor = (1.0,1.0,1.0), dynamic = True )
+w = Window( width = 2200, height = 1800, bgcolor = (1.0,1.0,1.0), dynamic = True )
 
 mytransform = Transform3D(np.eye(4))
 mytransform.set_scale(-1, -1, 1)
