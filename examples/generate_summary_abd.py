@@ -1,25 +1,31 @@
-from fos import *
-import numpy as np
-import sys
-import h5py
-import microcircuit as mc
 import os
+
+import numpy as np
+import h5py
+
+from fos import *
+import microcircuit as mc
+
+
+###########
 
 filename = '/home/stephan/abd15circuit.hdf'
 hdf_path = '/Microcircuit'
 temp_image_dir = '/tmp/out'
 
-name_whitelist = ['md (11)', 'md (10)']
-#name_whitelist = ['Lineages', 'LEFT', 'RIGHT']
+#name_whitelist = ['md (11)', 'md (10)']
+name_whitelist = ['Lineages', 'LEFT', 'RIGHT']
 
 outline_id = 17612674
 long_id = 17612866
 width = 1898
 height = 1103
 
+nr_nodes_high_pass = 20
+
 #############
 
-c=mc.load_neurohdf(filename, hdf_path)
+c = mc.load_neurohdf(filename, hdf_path)
 all_skeletons = c.get_all_skeletons()
 
 conn_color_map = {
@@ -114,6 +120,9 @@ def display():
             #print 'Skipped'
             continue
 
+        if nr_of_nodes < nr_nodes_high_pass:
+            continue
+
         filename = allnames[-1]
         region.add_actor(outline_actor,trigger_update=True)
 
@@ -124,8 +133,7 @@ def display():
         w.refocus_camera()
         # update zoom
         w.glWidget.ortho_zoom(0.25)
-        #w.screenshot( '/tmp/out/%s_XY_(skeleton %i).png' % (filename, skeleton_id) )
-        w.screenshot( os.path.join(temp_image_dir, '%i_xy.png' % skeleton_id ) )
+        w.screenshot( os.path.join(temp_image_dir, '%05i_%i_xy.png' % (nr_of_nodes, skeleton_id ) ) )
 
         # remove outline actor
         region.remove_actor( outline_actor )
@@ -135,8 +143,7 @@ def display():
         w.refocus_camera()
         w.glWidget.world.camera.rotate_around_focal( -1.5, 'right' )
         w.glWidget.ortho_zoom(0.15)
-        #w.screenshot( '/tmp/out/%s_XZ_(skeleton %i).png' % (filename, skeleton_id) )
-        w.screenshot( os.path.join(temp_image_dir, '%i_xz.png' % skeleton_id ) )
+        w.screenshot( os.path.join(temp_image_dir, '%05i_%i_xz.png' % (nr_of_nodes, skeleton_id ) ) )
 
         region.remove_actor( long_actor )
         region.remove_actor( r )

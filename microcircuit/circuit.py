@@ -226,6 +226,10 @@ class Circuit(CircuitBase):
     def get_skeleton_number_of_nodes(self, skeleton_id ):
         return len(np.where(self.vertices_properties['skeletonid']['data']==skeleton_id)[0])
 
+    def get_skeleton_vertices_and_ids(self, skeleton_id ):
+        index = np.where(self.vertices_properties['skeletonid']['data']==skeleton_id)[0]
+        return self.vertices_properties['location']['data'][index,:], self.vertices[index,:]
+
     def get_skeleton(self, skeleton_id ):
         """ Return skeleton object
         """
